@@ -148,6 +148,14 @@ Xand2 PA PB Po AND2
 Xor1 GA andA Go OR2
 .ends
 
+
+* Grey cell
+.subckt GREY GA PA GB Go
+Xand1 PA GB andA AND2
+Xor1 GA andA Go OR2
+.ends
+
+
 * 4 bit Carry Select
 .subckt CSA A[3:0] B[3:0] CI S[3:0] Co
 Xcla0 A[3:0] B[3:0] 0 SA[3:0] CA CLA
