@@ -132,6 +132,14 @@ Xs3 p3A co3C S3 xor2
 //.ends
 
 
+
+* Pre-processing for Brent Kung Adder
+* Calculate the P and G
+.subckt PG A[31:0] B[31:0] P[31:0] G[31:0]
+Xg A[31:0] B[31:0] G[31:0] AND2
+Xp A[31:0] B[31:0] P[31:0] xor2
+.ends
+
 * 4 bit Carry Select
 .subckt CSA A[3:0] B[3:0] CI S[3:0] Co
 Xcla0 A[3:0] B[3:0] 0 SA[3:0] CA CLA
@@ -156,7 +164,7 @@ Xxor0 B[31:0] op0#32 XB[31:0] xor2
 //Xxor1 PS[31:0] C[30:0] op0 s[31:0] xor2
 
 // tpd = 4.954
-Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CSA
+Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CLA
 Xcsa0 A[7:4] XB[7:4] C0 s[7:4] C1 CSA
 Xcsa1 A[11:8] XB[11:8] C1 s[11:8] C2 CSA
 Xcsa2 A[15:12] XB[15:12] C2 s[15:12] C3 CSA
