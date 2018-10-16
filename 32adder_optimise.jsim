@@ -1,6 +1,5 @@
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/nominal.jsim"
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
-//.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/lab3adder.jsim"
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_100ns.jsim"
 
 
@@ -28,6 +27,13 @@ Xnand1 N1 z inverter
 .subckt newOR A B z
 Xnor0 A B N1 nor2
 Xnor1 N1 z inverter
+.ends
+
+.subckt newXOR A B z
+Xnand0 A B n1 nand2
+Xnand1 A n1 n2 nand2
+Xnand2 B n1 n3 nand2
+Xnand3 n2 n3 z nand2
 .ends
 
 
@@ -126,21 +132,23 @@ Xp A[31:0] B[31:0] P[31:0] xor2
 
 * Black Cell
 .subckt BLACK GA PA GB PB Go Po
-Xand1 PA GB andA newAND
+Xao1 PA GB GA ao1 aoi21
 Xand2 PA PB Po newAND
-Xor1 GA andA Go newOR
+Xinv ao1 Go inverter
 .ends
 
 
 * Grey cell
 .subckt GREY GA PA GB Go
-Xand1 PA GB andA newAND
-Xor1 GA andA Go newOR
+Xao1 PA GB GA ao1 aoi21
+Xinv ao1 Go inverter
 .ends
 
 
 * Buffer2 cell
 .subckt BUF2 GA PA Go Po
+//Xb1 GA Go buffer
+//Xb2 PA Po buffer
 .connect GA Go
 .connect PA Po
 .ends
@@ -206,10 +214,12 @@ Xgp A[31:0] XB[31:0] P[31:0] G[31:0] PG
 // End of CLA followed by CSA
 
 
+Xb op0 bop buffer_4
+
 // Brent-Kung 32bit adder
 // First level
-Xbf0 op0 GB0 BUF
-Xgy01 G0 P0 op0 G_01_ GREY
+Xbf0 bop GB0 BUF
+Xgy01 G0 P0 bop G_01_ GREY
 Xbf2 G1 P1 GB2 PB2 BUF2
 Xbk23 G2 P2 G1 P1 G_23_ P_23_ BLACK
 Xbf4 G3 P3 GB4 PB4 BUF2
@@ -357,14 +367,14 @@ Xxor20 P20 G_020_ s20 xor2
 Xxor21 P21 GB_21_2_ s21 xor2
 Xxor22 P22 G_022_ s22 xor2
 Xxor23 P23 GB_23_2_ s23 xor2
-Xxor24 P24 GB_23_2_ s24 xor2
-Xxor25 P25 G_024_ s25 xor2
-Xxor26 P26 GB_25_2_ s26 xor2
-Xxor27 P27 G_026_ s27 xor2
-Xxor28 P28 GB_27_2_ s28 xor2
-Xxor29 P29 G_028_ s29 xor2
-Xxor30 P30 GB_29_2_ s30 xor2
-Xxor31 P31 G_030_ s31 xor2
+Xxor24 P24 G_024_ s24 xor2
+Xxor25 P25 GB_25_2_ s25 xor2
+Xxor26 P26 G_026_ s26 xor2
+Xxor27 P27 GB_27_2_ s27 xor2
+Xxor28 P28 G_028_ s28 xor2
+Xxor29 P29 GB_29_2_ s29 xor2
+Xxor30 P30 G_030_ s30 xor2
+Xxor31 P31 GB31 s31 xor2
 // End of Brent-Kung 32bit adder
 
 
