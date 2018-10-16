@@ -3,17 +3,6 @@
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_4ns.jsim"
 
 
-* 3-input ADD3: inputs are A, b and C, output is S and C
-.subckt FA a b ci s co
-Xnand1 a b 1 nand2
-Xnand2 a ci 2 nand2
-Xnand3 b ci 3 nand2
-Xnand4 1 2 3 co nand3
-Xor1 a b 4 xor2
-Xor2 4 ci s xor2
-.ends
-
-
 .subckt NOR4_SUB inp[3:0] z
 Xnor4 inp[3] inp[2] inp[1] inp[0] z nor4
 .ends
@@ -158,54 +147,15 @@ XmuxC CI CA CB Co mux2
 XmuxS0 CI#4 SA[3:0] SB[3:0] S[3:0] mux2
 .ends
 
+* 32 bit Adder
 .subckt adder32 op0 A[31:0] B[31:0] s[31:0] z v n
+
 // output s
-Xxor B[31:0] op0#32 XB[31:0] xor2
-//Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CLA
-//Xcla1 A[7:4] XB[7:4] C0 s[7:4] C1 CLA
-//Xcla2 A[11:8] XB[11:8] C1 s[11:8] C2 CLA
-//Xcla3 A[15:12] XB[15:12] C2 s[15:12] C3 CLA
-//Xcla4 A[19:16] XB[19:16] C3 s[19:16] C4 CLA
-//Xcla5 A[23:20] XB[23:20] C4 s[23:20] C5 CLA
-//Xcla6 A[27:24] XB[27:24] C5 s[27:24] C6 CLA
-//Xcla7 A[31:28] XB[31:28] C6 s[31:28] C7 CLA
-//Xcla A[31:0] XB[31:0] C[6:0] op0 s[31:0] C[7:0] CLA
-//Xcla A[31:0] XB[31:0] C[30:0] op0 PS[31:0] C[31:0] carry
-//Xxor1 PS[31:0] C[30:0] op0 s[31:0] xor2
-
-// tpd = 4.954
-//Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CLA
-//Xcsa0 A[7:4] XB[7:4] C0 s[7:4] C1 CSA
-//Xcsa1 A[11:8] XB[11:8] C1 s[11:8] C2 CSA
-//Xcsa2 A[15:12] XB[15:12] C2 s[15:12] C3 CSA
-//Xcsa3 A[19:16] XB[19:16] C3 s[19:16] C4 CSA
-//Xcsa4 A[23:20] XB[23:20] C4 s[23:20] C5 CSA
-//Xcsa5 A[27:24] XB[27:24] C5 s[27:24] C6 CSA
-//Xcsa6 A[31:28] XB[31:28] C6 s[31:28] C7 CSA
-
-// slowest
-//Xadd0 A0 XB0 op0 s[0] c[0] FA
-//Xadd1 A[30:1] XB[30:1] c[29:0] s[30:1] c[30:1] FA
-//Xadd2 A[31] XB[31] c[30] s[31] co FA
-
+Xb op0 bop buffer_4
+Xxor B[31:0] bop#32 XB[31:0] xor2
 
 // Pre-processing all the A and B
 Xgp A[31:0] XB[31:0] P[31:0] G[31:0] PG
-
-
-// CLA followed by CSA
-//Xcla0 P[3:0] G[3:0] op0 S[3:0] co_3_ CLA
-//Xcsa1 P[7:4] G[7:4] co_3_ S[7:4] co_7_ CSA
-//Xcsa2 P[11:8] G[11:8] co_7_ S[11:8] co_11_ CSA
-//Xcsa3 P[15:12] G[15:12] co_11_ S[15:12] co_15_ CSA
-//Xcsa4 P[19:16] G[19:16] co_15_ S[19:16] co_19_ CSA
-//Xcsa5 P[23:20] G[23:20] co_19_ S[23:20] co_23_ CSA
-//Xcsa6 P[27:24] G[27:24] co_23_ S[27:24] co_27_ CSA
-//Xcsa7 P[31:28] G[31:28] co_27_ S[31:28] co_31_ CSA
-// End of CLA followed by CSA
-
-
-Xb op0 bop buffer_4
 
 // Brent-Kung 32bit adder
 // First level
