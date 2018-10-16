@@ -1,6 +1,6 @@
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/nominal.jsim"
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
-.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_100ns.jsim"
+.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_4ns.jsim"
 
 
 * 3-input ADD3: inputs are A, b and C, output is S and C
@@ -48,18 +48,9 @@ Xnor5 inp[23:20] N6 NOR4_SUB
 Xnor6 inp[27:24] N7 NOR4_SUB
 Xnor7 inp[31:28] N8 NOR4_SUB
 
-Xand0 N1 N2 A1 newAND
-Xand1 A1 N3 A2 newAND
-Xand2 A2 N4 A3 newAND
-Xand3 A3 N5 A4 newAND
-Xand4 A4 N6 A5 newAND
-Xand5 A5 N7 A6 newAND
-Xand6 A6 N8 z newAND
-
-
-//Xand0 N1 N2 N3 N4 F1 and4
-//Xand1 N5 N6 N7 N8 F2 and4
-//Xand2 F1 F2 z and2
+Xand0 N1 N2 N3 N4 F1 nand4
+Xand1 N5 N6 N7 N8 F2 nand4
+Xor1 F1 F2 z nor2
 .ends
 
 
@@ -81,35 +72,35 @@ Xor0 a0 a1 v or2
 Xxor0 P0 CI S0 xor2
 
 // S1
-Xand1 P0 CI and_10_ newAND
-Xor1 G0 and_10_ co_10_ newOR
+Xand1 P0 CI and_10_ and2
+Xor1 G0 and_10_ co_10_ or2
 Xxor1 P1 co_10_ S1 xor2
 
 // S2	
 Xand20 P0 CI and_20_ AND2
-Xor20 G0 and_20_ co_20_ newOR
-Xand21 P1 co_20_ and_21_ newAND
-Xor21 G1 and_21_ co_21_ newOR
+Xor20 G0 and_20_ co_20_ or2
+Xand21 P1 co_20_ and_21_ and2
+Xor21 G1 and_21_ co_21_ or2
 Xxor2 P2 co_21_ S2 xor2
 
 // S3
-Xand30 P0 CI and_30_ newAND
-Xor30 G0 and_30_ co_30_ newOR
-Xand31 P1 co_30_ and_31_ newAND
-Xor31 G1 and_31_ co_31_ newOR
-Xand32 P2 co_31_ and_32_ newAND
-Xor32 G2 and_32_ co_32_ newOR
+Xand30 P0 CI and_30_ and2
+Xor30 G0 and_30_ co_30_ or2
+Xand31 P1 co_30_ and_31_ and2
+Xor31 G1 and_31_ co_31_ or2
+Xand32 P2 co_31_ and_32_ and2
+Xor32 G2 and_32_ co_32_ or2
 Xxor3 P3 co_32_ S3 xor2
 
 // co3
-Xand40 P0 CI and_40_ newAND
-Xor40 G0 and_40_ co_40_ newOR
-Xand41 P1 co_40_ and_41_ newAND
-Xor41 G1 and_41_ co_41_ newOR
-Xand42 P2 co_41_ and_42_ newAND
-Xor42 G2 and_42_ co_42_ newOR
-Xand43 P3 co_42_ and_43_ newAND
-Xor43 G3 and_43_ co newOR
+Xand40 P0 CI and_40_ and2
+Xor40 G0 and_40_ co_40_ or2
+Xand41 P1 co_40_ and_41_ and2
+Xor41 G1 and_41_ co_41_ or2
+Xand42 P2 co_41_ and_42_ and2
+Xor42 G2 and_42_ co_42_ or2
+Xand43 P3 co_42_ and_43_ and2
+Xor43 G3 and_43_ co or2
 
 .ends
 
@@ -125,7 +116,7 @@ Xor43 G3 and_43_ co newOR
 * Pre-processing for Brent Kung Adder
 * Calculate the P and G
 .subckt PG A[31:0] B[31:0] P[31:0] G[31:0]
-Xg A[31:0] B[31:0] G[31:0] newAND
+Xg A[31:0] B[31:0] G[31:0] and2
 Xp A[31:0] B[31:0] P[31:0] xor2
 .ends
 
@@ -133,7 +124,7 @@ Xp A[31:0] B[31:0] P[31:0] xor2
 * Black Cell
 .subckt BLACK GA PA GB PB Go Po
 Xao1 PA GB GA ao1 aoi21
-Xand2 PA PB Po newAND
+Xand2 PA PB Po and2
 Xinv ao1 Go inverter
 .ends
 
@@ -376,10 +367,6 @@ Xxor29 P29 GB_29_2_ s29 xor2
 Xxor30 P30 G_030_ s30 xor2
 Xxor31 P31 GB31 s31 xor2
 // End of Brent-Kung 32bit adder
-
-
-
-
 
 
 // output z
