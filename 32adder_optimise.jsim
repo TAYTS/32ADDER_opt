@@ -1,6 +1,6 @@
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/nominal.jsim"
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
-.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_4ns.jsim"
+.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_3ns.jsim"
 
 
 .subckt NOR4_SUB inp[3:0] z
@@ -151,7 +151,7 @@ XmuxS0 CI#4 SA[3:0] SB[3:0] S[3:0] mux2
 .subckt adder32 op0 A[31:0] B[31:0] s[31:0] z v n
 
 // output s
-Xb op0 bop buffer_4
+Xb op0 bop buffer_8
 Xxor B[31:0] bop#32 XB[31:0] xor2
 
 // Pre-processing all the A and B
