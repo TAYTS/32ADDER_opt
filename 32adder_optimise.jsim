@@ -6,7 +6,7 @@
 .include "C:\Users\kensi\Desktop\50002/nominal.jsim"
 .include "C:\Users\kensi\Desktop\50002/stdcell.jsim"
 //.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/lab3adder.jsim"
-.include "C:\Users\kensi\Desktop\50002\checkoff2d/2dcheckoff_6ns.jsim"
+.include "C:\Users\kensi\Desktop\50002\checkoff2d/2dcheckoff_100ns.jsim"
 
 
 * 3-input ADD3: inputs are A, b and C, output is S and C
@@ -72,14 +72,11 @@ Xand1 inv_a inv_b S a1 and3
 Xor0 a0 a1 v or2
 .ends
 
-*FA for a 4CLA
-//.subckt A B C P G S
-
 
 
 
 * Compute the carry
-.subckt CLA A[3:0] B[3:0] CI S[3:0] co3
+.subckt cla4 A[3:0] B[3:0] CI S[3:0] co3 pg gg
 // C0
 Xg0 A0 B0 g0A AND2
 Xp0 A0 B0 p0A xor2
@@ -132,8 +129,28 @@ Xpc3 p3A co3C pc3D AND2
 Xco3 g3A pc3D co3 OR2
 Xs3 p3A co3C S3 xor2
 
+//calculating PG GG
+Xpg p0A p1A p2A p3A pg and4
+Xgg1 g2a p3a gg0a AND2
+Xgg2 g1a p3a p2a gg1a and3
+Xgg3 g0a p3a p2a p1a gg2a and4
+Xgg4 g3a gg0a gg1a gg2a gg or4
+
 .ends
 
+.subckt cla16 A[15:0] B[15:0] Ci S[15:0] Cg
+Xid1 A[3:0] B[3:0] Ci s[3:0] Ci1 p0a g0a cla4
+Xid2 A[7:4] B[7:4] Ci1 s[7:4] Ci2 p1a g1a cla4
+Xid3 A[11:8] B[11:8] Ci2 s[11:8] Ci3 p2a g2a cla4
+Xid4 A[15:12] B[15:12] Ci3 s[15:12] gnd p3a g3a cla4
+Xpg p0a p1A p2a p3a pg and4
+Xgg1 g2a p3a gg0a AND2
+Xgg2 g1a p3a p2a gg1a and3
+Xgg3 g0a p3a p2a p1a gg2a and4
+Xgg4 g3a gg0a gg1a gg2a gg or4
+X10 pg Ci cg0a AND2
+X11 cg0a gg Cg OR2
+.ends
 
 * 4 bit Carry Look Ahead
 //.subckt CLA A[3:0] B[3:0] CI S[3:0] C3
@@ -144,15 +161,23 @@ Xs3 p3A co3C S3 xor2
 
 * 4 bit Carry Select
 .subckt CSA A[3:0] B[3:0] CI S[3:0] Co
-Xcla0 A[3:0] B[3:0] 0 SA[3:0] CA CLA
+Xcla0 A[3:0] B[3:0] gnd SA[3:0] CA CLA
 Xcla1 A[3:0] B[3:0] vdd SB[3:0] CB CLA
 XmuxC CI CA CB Co mux2
 XmuxS0 CI#4 SA[3:0] SB[3:0] S[3:0] mux2
 .ends
 
 .subckt adder32 op0 A[31:0] B[31:0] s[31:0] z v n
-// output s
-Xxor0 B[31:0] op0#32 XB[31:0] xor2
+// carry select implementation
+  X0 op0 op0b buffer_8
+Xxor0 B[31:0] op0b#32 XB[31:0] xor2
+Xid1 A[15:0] XB[15:0] op0 s[15:0] Ci cla16
+Xid4 A[31:16] XB[31:16] vdd sh[31:16] C01 cla16
+Xid5 A[31:16] XB[31:16] 0 sl[31:16] C02 cla16
+Xmux Ci#16 sl[31:16] sh[31:16] s[31:16] mux2
+//499 Xs 310
+
+
 //Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CLA
 //Xcla1 A[7:4] XB[7:4] C0 s[7:4] C1 CLA
 //Xcla2 A[11:8] XB[11:8] C1 s[11:8] C2 CLA
@@ -166,14 +191,14 @@ Xxor0 B[31:0] op0#32 XB[31:0] xor2
 //Xxor1 PS[31:0] C[30:0] op0 s[31:0] xor2
 
 // tpd = 4.954
-Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CSA
-Xcsa0 A[7:4] XB[7:4] C0 s[7:4] C1 CSA
-Xcsa1 A[11:8] XB[11:8] C1 s[11:8] C2 CSA
-Xcsa2 A[15:12] XB[15:12] C2 s[15:12] C3 CSA
-Xcsa3 A[19:16] XB[19:16] C3 s[19:16] C4 CSA
-Xcsa4 A[23:20] XB[23:20] C4 s[23:20] C5 CSA
-Xcsa5 A[27:24] XB[27:24] C5 s[27:24] C6 CSA
-Xcsa6 A[31:28] XB[31:28] C6 s[31:28] C7 CSA
+//Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CSA
+//Xcsa0 A[7:4] XB[7:4] C0 s[7:4] C1 CSA
+//Xcsa1 A[11:8] XB[11:8] C1 s[11:8] C2 CSA
+//Xcsa2 A[15:12] XB[15:12] C2 s[15:12] C3 CSA
+//Xcsa3 A[19:16] XB[19:16] C3 s[19:16] C4 CSA
+//Xcsa4 A[23:20] XB[23:20] C4 s[23:20] C5 CSA
+//Xcsa5 A[27:24] XB[27:24] C5 s[27:24] C6 CSA
+//Xcsa6 A[31:28] XB[31:28] C6 s[31:28] C7 CSA
 
 
 
