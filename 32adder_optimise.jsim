@@ -1,7 +1,12 @@
-.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/nominal.jsim"
-.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
+//.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/nominal.jsim"
+//.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
 //.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/lab3adder.jsim"
-.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_6ns.jsim"
+//.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_6ns.jsim"
+
+.include "C:\Users\kensi\Desktop\50002/nominal.jsim"
+.include "C:\Users\kensi\Desktop\50002/stdcell.jsim"
+//.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/lab3adder.jsim"
+.include "C:\Users\kensi\Desktop\50002\checkoff2d/2dcheckoff_6ns.jsim"
 
 
 * 3-input ADD3: inputs are A, b and C, output is S and C
@@ -22,12 +27,12 @@ Xnor4 inp[3] inp[2] inp[1] inp[0] z nor4
 
 .subckt AND2 A B z
 Xnand0 A B N1 nand2
-Xnand1 N1 N1 z nand2
+Xnand1 N1 z inverter
 .ends
 
 .subckt OR2 A B z
 Xnor0 A B N1 nor2
-Xnor1 N1 N1 z nor2
+Xnor1 N1 z inverter
 .ends
 
 
@@ -66,6 +71,11 @@ Xand0 XA XB inv_s a0 and3
 Xand1 inv_a inv_b S a1 and3
 Xor0 a0 a1 v or2
 .ends
+
+*FA for a 4CLA
+//.subckt A B C P G S
+
+
 
 
 * Compute the carry
