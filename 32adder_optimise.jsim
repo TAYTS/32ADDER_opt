@@ -2,20 +2,9 @@
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_3ns.jsim"
 
-
+* new NOR4 sub circuit
 .subckt NOR4_SUB inp[3:0] z
 Xnor4 inp[3] inp[2] inp[1] inp[0] z nor4
-.ends
-
-
-.subckt newAND A B z
-Xnand0 A B N1 nand2 
-Xnand1 N1 z inverter
-.ends
-
-.subckt newOR A B z
-Xnor0 A B N1 nor2
-Xnor1 N1 z inverter
 .ends
 
 
@@ -47,53 +36,6 @@ Xnand2 a0 a1 v nand2
 .ends
 
 
-* Compute the carry
-.subckt CLA P[3:0] G[3:0] CI S[3:0] co
-
-// S0
-Xxor0 P0 CI S0 xor2
-
-// S1
-Xand1 P0 CI and_10_ and2
-Xor1 G0 and_10_ co_10_ or2
-Xxor1 P1 co_10_ S1 xor2
-
-// S2	
-Xand20 P0 CI and_20_ AND2
-Xor20 G0 and_20_ co_20_ or2
-Xand21 P1 co_20_ and_21_ and2
-Xor21 G1 and_21_ co_21_ or2
-Xxor2 P2 co_21_ S2 xor2
-
-// S3
-Xand30 P0 CI and_30_ and2
-Xor30 G0 and_30_ co_30_ or2
-Xand31 P1 co_30_ and_31_ and2
-Xor31 G1 and_31_ co_31_ or2
-Xand32 P2 co_31_ and_32_ and2
-Xor32 G2 and_32_ co_32_ or2
-Xxor3 P3 co_32_ S3 xor2
-
-// co3
-Xand40 P0 CI and_40_ and2
-Xor40 G0 and_40_ co_40_ or2
-Xand41 P1 co_40_ and_41_ and2
-Xor41 G1 and_41_ co_41_ or2
-Xand42 P2 co_41_ and_42_ and2
-Xor42 G2 and_42_ co_42_ or2
-Xand43 P3 co_42_ and_43_ and2
-Xor43 G3 and_43_ co or2
-
-.ends
-
-
-* 4 bit Carry Look Ahead
-//.subckt CLA A[3:0] B[3:0] CI S[3:0] C3
-//Xcla A[3:0] B[3:0] C[2:0] CI PS[3:0] C[3:0] carry
-//Xxor2 C[2:0] CI PS[3:0] S[3:0] xor2
-//.ends
-
-
 
 * Pre-processing for Brent Kung Adder
 * Calculate the P and G
@@ -104,10 +46,16 @@ Xp A[31:0] B[31:0] P[31:0] xor2
 
 
 * Black Cell
-.subckt BLACK GA PA GB PB Go Po
+.subckt BLACK2 GA PA GB PB Go Po
 Xgy1 GA PA GB Go GREY
 Xnand1 PA PB n1 nand2
 Xinv n1 Po inverter
+.ends
+
+* Black Cell ignore PB
+.subckt BLACK GA PA GB PB Go Po
+Xgy1 GA PA GB Go GREY
+.connect PA Po
 .ends
 
 
@@ -135,24 +83,20 @@ Xinv ao1 Go inverter
 
 
 // output s
-Xb op0 bop buffer_4
-Xxor B[31:0] bop#32 XB[31:0] xor2
+Xbf op0 bfop buffer_8
+Xxor B[31:0] bfop#32 XB[31:0] xor2
 
-
-//XxorA B[31:0] 0#32 xb_A[31:0] xor2
-//XxorB B[31:0] vdd#32 xb_B[31:0] xor2
-
-//Xmux bop#32 xb_A[31:0] xb_B[31:0] XB[31:0] mux2
 
 // Pre-processing all the A and B
 Xgp A[31:0] XB[31:0] P[31:0] G[31:0] PG
 
+
 // Brent-Kung 32bit adder
 // First level
-Xbf0 bop GB0 BUF
-Xgy01 G0 P0 bop G_01_ GREY
+Xbf0 bfop GB0 BUF
+Xgy01 G0 P0 bfop G_01_ GREY
 Xbf2 G1 P1 GB2 PB2 BUF2
-Xbk23 G2 P2 G1 P1 G_23_ P_23_ BLACK
+Xbk23 G2 P2 G1 P1 G_23_ P_23_ BLACK2
 Xbf4 G3 P3 GB4 PB4 BUF2
 Xbk45 G4 P4 G3 P3 G_45_ P_45_ BLACK
 Xbf6 G5 P5 GB6 PB6 BUF2
@@ -191,14 +135,17 @@ Xbk47 G_67_ P_67_ G_45_ P_45_ G_47_ P_47_ BLACK
 Xbf9 G_89_ P_89_ GB9 PB9 BUF2
 Xbk811 G_1011_ P_1011_ G_89_ P_89_ G_811_ P_811_ BLACK
 Xbf13 G_1213_ P_1213_ GB13 PB13 BUF2
+Xbk1214 GB14 PB14 G_1213_ P_1213_ G_1214_ P_1214_ BLACK
 Xbk1215 G_1415_ P_1415_ G_1213_ P_1213_ G_1215_ P_1215_ BLACK
 Xbf17 G_1617_ P_1617_ GB17 PB17 BUF2
 Xbk1619 G_1819_ P_1819_ G_1617_ P_1617_ G_1619_ P_1619_ BLACK
 Xbf21 G_2021_ P_2021_ GB21 PB21 BUF2
+Xbk2022 GB22 PB22 G_2021_ P_2021_ G_2022_ P_2022_ BLACK
 Xbk2023 G_2223_ P_2223_ G_2021_ P_2021_ G_2023_ P_2023_ BLACK
 Xbf25 G_2425_ P_2425_ GB25 PB25 BUF2
 Xbk2427 G_2627_ P_2627_ G_2425_ P_2425_ G_2427_ P_2427_ BLACK
 Xbf29 G_2829_ P_2829_ GB29 PB29 BUF2
+Xbk2830 GB30 PB30 G_2829_ P_2829_ G_2830_ P_2830_ BLACK
 Xbk2831 G_3031_ P_3031_ G_2829_ P_2829_ G_2831_ P_2831_ BLACK
 
 
@@ -236,6 +183,12 @@ Xgy027 GB27 PB27 G_023_ G_027_ GREY
 
 
 // Eigth level
+Xgy014 G_1214_ P_1214_ G_011_ G_014_ GREY
+Xgy022 G_2022_ P_2022_ G_019_ G_022_ GREY
+Xgy030 G_2830_ P_2830_ G_027_ G_030_ GREY
+
+
+// Nineth level
 Xgy05 GB5 PB5 GB3 G_05_ GREY
 Xgy09 GB9 PB9 GB7 G_09_ GREY
 Xbf11_2 G_011_ GB_11_2_ BUF
@@ -248,7 +201,7 @@ Xbf27_2 G_027_ GB_27_2_ BUF
 Xgy029 GB29 PB29 G_027_ G_029_ GREY
 
 
-// Nineth level
+// Tenth level
 Xgy02 GB2 PB2 GB1 G_02_ GREY
 Xgy04 GB4 PB4 GB3 G_04_ GREY
 Xbf5_2 G_05_ GB_5_2_ BUF
@@ -258,19 +211,16 @@ Xbf9_2 G_09_ GB_9_2_ BUF
 Xgy010 GB10 PB10 G_09_ G_010_ GREY
 Xgy012 GB12 PB12 GB_11_2_ G_012_ GREY
 Xbf13_2 G_013_ GB_13_2_ BUF
-Xgy014 GB14 PB14 G_013_ G_014_ GREY
 Xgy016 GB16 PB16 GB15 G_016_ GREY
 Xbf17_2 G_017_ GB_17_2_ BUF
 Xgy018 GB18 PB18 G_017_ G_018_ GREY
 Xgy020 GB20 PB20 GB_19_2_ G_020_ GREY
 Xbf21_2 G_021_ GB_21_2_ BUF
-Xgy022 GB22 PB22 G_021_ G_022_ GREY
 Xgy024 GB24 PB24 GB_23_2_ G_024_ GREY
 Xbf25_2 G_025_ GB_25_2_ BUF
 Xgy026 GB26 PB26 G_025_ G_026_ GREY
 Xgy028 GB28 PB28 GB_27_2_ G_028_ GREY
 Xbf29_2 G_029_ GB_29_2_ BUF
-Xgy030 GB30 PB30 G_029_ G_030_ GREY
 
 
 // Calculate Sum
