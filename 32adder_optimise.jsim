@@ -1,33 +1,10 @@
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/nominal.jsim"
 .include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/stdcell.jsim"
-//.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/50-002_Computation_Structures/Software_Lab/50002/lab3adder.jsim"
-.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_6ns.jsim"
+.include "/Users/taytzushieh/Dropbox/SUTD/SCHOOL_STUFF/TERM4/2D/checkoff2d/2dcheckoff_3ns.jsim"
 
-
-* 3-input ADD3: inputs are A, b and C, output is S and C
-.subckt FA a b ci s co
-Xnand1 a b 1 nand2
-Xnand2 a ci 2 nand2
-Xnand3 b ci 3 nand2
-Xnand4 1 2 3 co nand3
-Xor1 a b 4 xor2
-Xor2 4 ci s xor2
-.ends
-
-
+* new NOR4 sub circuit
 .subckt NOR4_SUB inp[3:0] z
 Xnor4 inp[3] inp[2] inp[1] inp[0] z nor4
-.ends
-
-
-.subckt AND2 A B z
-Xnand0 A B N1 nand2
-Xnand1 N1 N1 z nand2
-.ends
-
-.subckt OR2 A B z
-Xnor0 A B N1 nor2
-Xnor1 N1 N1 z nor2
 .ends
 
 
@@ -42,18 +19,9 @@ Xnor5 inp[23:20] N6 NOR4_SUB
 Xnor6 inp[27:24] N7 NOR4_SUB
 Xnor7 inp[31:28] N8 NOR4_SUB
 
-Xand0 N1 N2 A1 AND2
-Xand1 A1 N3 A2 AND2
-Xand2 A2 N4 A3 AND2
-Xand3 A3 N5 A4 AND2
-Xand4 A4 N6 A5 AND2
-Xand5 A5 N7 A6 AND2
-Xand6 A6 N8 z AND2
-
-
-//Xand0 N1 N2 N3 N4 F1 and4
-//Xand1 N5 N6 N7 N8 F2 and4
-//Xand2 F1 F2 z and2
+Xand0 N1 N2 N3 N4 F1 nand4
+Xand1 N5 N6 N7 N8 F2 nand4
+Xor1 F1 F2 z nor2
 .ends
 
 
@@ -62,121 +30,241 @@ Xand6 A6 N8 z AND2
 Xinvs S  inv_s inverter
 Xinva XA inv_a inverter
 Xinvb XB inv_b inverter
-Xand0 XA XB inv_s a0 and3
-Xand1 inv_a inv_b S a1 and3
-Xor0 a0 a1 v or2
+Xnand0 XA XB inv_s a0 nand3
+Xnand1 inv_a inv_b S a1 nand3
+Xnand2 a0 a1 v nand2
 .ends
 
 
-* Compute the carry
-.subckt CLA A[3:0] B[3:0] CI S[3:0] co3
-// C0
-Xg0 A0 B0 g0A AND2
-Xp0 A0 B0 p0A xor2
-Xpc0 p0A CI pc0A AND2
-Xco0 g0A pc0A co0 OR2
-Xs0 p0A CI S0 xor2
 
-// C1
-Xg1 A1 B1 g1A AND2
-Xp1 A1 B1 p1A xor2
-Xg10 A0 B0 g1B AND2
-Xp10 A0 B0 p1B xor2
-Xpc10 p1B CI pc1A AND2
-Xco10 g1B pc1A co1A OR2
-Xpc1 p1A co1A pc1B AND2
-Xco1 g1A pc1B co1 OR2
-Xs1 p1A co1A S1 xor2
-
-// C2	
-Xg2 A2 B2 g2A AND2
-Xp2 A2 B2 p2A xor2
-Xg21 A1 B1 g2B AND2
-Xp21 A1 B1 p2B xor2
-Xg20 A0 B0 g2C AND2
-Xp20 A0 B0 p2C xor2
-Xpc20 p2C CI pc2A AND2
-Xco20 g2C pc2A co2A OR2
-Xpc21 p2B co2A pc2B AND2
-Xco21 g2B pc2B co2B OR2
-Xpc2 p2A co2B pc2C AND2
-Xco2 g2A pc2C co2 OR2
-Xs2 p2A co2B S2 xor2
-
-// C3
-Xg3 A3 B3 g3A AND2
-Xp3 A3 B3 p3A xor2
-Xg32 A2 B2 g3B AND2
-Xp32 A2 B2 p3B xor2
-Xg31 A1 B1 g3C AND2
-Xp31 A1 B1 p3C xor2
-Xg30 A0 B0 g3D AND2
-Xp30 A0 B0 p4D xor2
-Xpc30 p4D CI pc3A AND2
-Xco30 g3D pc3A co3A OR2
-Xpc31 p3C co3A pc3B AND2
-Xco31 g3C pc3B co3B OR2
-Xpc32 p3B co3B pc3C AND2
-Xco32 g3B pc3C co3C OR2
-Xpc3 p3A co3C pc3D AND2
-Xco3 g3A pc3D co3 OR2
-Xs3 p3A co3C S3 xor2
-
+* Pre-processing for Brent Kung Adder
+* Calculate the P and G
+.subckt PG A[31:0] B[31:0] P[31:0] G[31:0]
+Xg A[31:0] B[31:0] G[31:0] and2
+Xp A[31:0] B[31:0] P[31:0] xor2
 .ends
 
 
-* 4 bit Carry Look Ahead
-//.subckt CLA A[3:0] B[3:0] CI S[3:0] C3
-//Xcla A[3:0] B[3:0] C[2:0] CI PS[3:0] C[3:0] carry
-//Xxor2 C[2:0] CI PS[3:0] S[3:0] xor2
-//.ends
-
-
-* 4 bit Carry Select
-.subckt CSA A[3:0] B[3:0] CI S[3:0] Co
-Xcla0 A[3:0] B[3:0] 0 SA[3:0] CA CLA
-Xcla1 A[3:0] B[3:0] vdd SB[3:0] CB CLA
-XmuxC CI CA CB Co mux2
-XmuxS0 CI#4 SA[3:0] SB[3:0] S[3:0] mux2
+* Black Cell
+.subckt BLACK2 GA PA GB PB Go Po
+Xgy1 GA PA GB Go GREY
+Xnand1 PA PB n1 nand2
+Xinv n1 Po inverter
 .ends
 
+* Black Cell ignore PB
+.subckt BLACK GA PA GB PB Go Po
+Xgy1 GA PA GB Go GREY
+.connect PA Po
+.ends
+
+
+* Grey cell
+.subckt GREY GA PA GB Go
+Xao1 PA GB GA ao1 aoi21
+Xinv ao1 Go inverter
+.ends
+
+
+* Buffer2 cell
+.subckt BUF2 GA PA Go Po
+.connect GA Go
+.connect PA Po
+.ends
+
+* Buffer1 cell
+.subckt BUF GA Go
+.connect GA Go
+.ends
+
+
+* 32 bit Adder
 .subckt adder32 op0 A[31:0] B[31:0] s[31:0] z v n
+
+
 // output s
-Xxor0 B[31:0] op0#32 XB[31:0] xor2
-//Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CLA
-//Xcla1 A[7:4] XB[7:4] C0 s[7:4] C1 CLA
-//Xcla2 A[11:8] XB[11:8] C1 s[11:8] C2 CLA
-//Xcla3 A[15:12] XB[15:12] C2 s[15:12] C3 CLA
-//Xcla4 A[19:16] XB[19:16] C3 s[19:16] C4 CLA
-//Xcla5 A[23:20] XB[23:20] C4 s[23:20] C5 CLA
-//Xcla6 A[27:24] XB[27:24] C5 s[27:24] C6 CLA
-//Xcla7 A[31:28] XB[31:28] C6 s[31:28] C7 CLA
-//Xcla A[31:0] XB[31:0] C[6:0] op0 s[31:0] C[7:0] CLA
-//Xcla A[31:0] XB[31:0] C[30:0] op0 PS[31:0] C[31:0] carry
-//Xxor1 PS[31:0] C[30:0] op0 s[31:0] xor2
-
-// tpd = 4.954
-Xcla0 A[3:0] XB[3:0] op0 s[3:0] C0 CSA
-Xcsa0 A[7:4] XB[7:4] C0 s[7:4] C1 CSA
-Xcsa1 A[11:8] XB[11:8] C1 s[11:8] C2 CSA
-Xcsa2 A[15:12] XB[15:12] C2 s[15:12] C3 CSA
-Xcsa3 A[19:16] XB[19:16] C3 s[19:16] C4 CSA
-Xcsa4 A[23:20] XB[23:20] C4 s[23:20] C5 CSA
-Xcsa5 A[27:24] XB[27:24] C5 s[27:24] C6 CSA
-Xcsa6 A[31:28] XB[31:28] C6 s[31:28] C7 CSA
+Xbf op0 bfop buffer_8
+Xxor B[31:0] bfop#32 XB[31:0] xor2
 
 
+// Pre-processing all the A and B
+Xgp A[31:0] XB[31:0] P[31:0] G[31:0] PG
 
-//Xadd0 A0 XB0 op0 s[0] c[0] FA
-//Xadd1 A[30:1] XB[30:1] c[29:0] s[30:1] c[30:1] FA
-//Xadd2 A[31] XB[31] c[30] s[31] co FA
+
+// Brent-Kung 32bit adder
+// First level
+Xbf0 bfop GB0 BUF
+Xgy01 G0 P0 bfop G_01_ GREY
+Xbf2 G1 P1 GB2 PB2 BUF2
+Xbk23 G2 P2 G1 P1 G_23_ P_23_ BLACK2
+Xbf4 G3 P3 GB4 PB4 BUF2
+Xbk45 G4 P4 G3 P3 G_45_ P_45_ BLACK
+Xbf6 G5 P5 GB6 PB6 BUF2
+Xbk67 G6 P6 G5 P5 G_67_ P_67_ BLACK
+Xbf8 G7 P7 GB8 PB8 BUF2
+Xbk89 G8 P8 G7 P7 G_89_ P_89_ BLACK
+Xbf10 G9 P9 GB10 PB10 BUF2
+Xbk1011 G10 P10 G9 P9 G_1011_ P_1011_ BLACK
+Xbf12 G11 P11 GB12 PB12 BUF2
+Xbk1213 G12 P12 G11 P11 G_1213_ P_1213_ BLACK
+Xbf14 G13 P13 GB14 PB14 BUF2
+Xbk1415 G14 P14 G13 P13 G_1415_ P_1415_ BLACK
+Xbf16 G15 P15 GB16 PB16 BUF2
+Xbk1617 G16 P16 G15 P15 G_1617_ P_1617_ BLACK
+Xbf18 G17 P17 GB18 PB18 BUF2
+Xbk1819 G18 P18 G17 P17 G_1819_ P_1819_ BLACK
+Xbf20 G19 P19 GB20 PB20 BUF2
+Xbk2021 G20 P20 G19 P19 G_2021_ P_2021_ BLACK
+Xbf22 G21 P21 GB22 PB22 BUF2
+Xbk2223 G22 P22 G21 P21 G_2223_ P_2223_ BLACK
+Xbf24 G23 P23 GB24 PB24 BUF2
+Xbk2425 G24 P24 G23 P23 G_2425_ P_2425_ BLACK
+Xbf26 G25 P25 GB26 PB26 BUF2
+Xbk2627 G26 P26 G25 P25 G_2627_ P_2627_ BLACK
+Xbf28 G27 P27 GB28 PB28 BUF2
+Xbk2829 G28 P28 G27 P27 G_2829_ P_2829_ BLACK
+Xbf30 G29 P29 GB30 PB30 BUF2
+Xbk3031 G30 P30 G29 P29 G_3031_ P_3031_ BLACK
+
+
+// Second level
+Xbf1 G_01_ GB1 BUF
+Xgy03 G_23_ P_23_ G_01_ G_03_ GREY
+Xbf5 G_45_ P_45_ GB5 PB5 BUF2
+Xbk47 G_67_ P_67_ G_45_ P_45_ G_47_ P_47_ BLACK
+Xbf9 G_89_ P_89_ GB9 PB9 BUF2
+Xbk811 G_1011_ P_1011_ G_89_ P_89_ G_811_ P_811_ BLACK
+Xbf13 G_1213_ P_1213_ GB13 PB13 BUF2
+Xbk1214 GB14 PB14 G_1213_ P_1213_ G_1214_ P_1214_ BLACK
+Xbk1215 G_1415_ P_1415_ G_1213_ P_1213_ G_1215_ P_1215_ BLACK
+Xbf17 G_1617_ P_1617_ GB17 PB17 BUF2
+Xbk1619 G_1819_ P_1819_ G_1617_ P_1617_ G_1619_ P_1619_ BLACK
+Xbf21 G_2021_ P_2021_ GB21 PB21 BUF2
+Xbk2022 GB22 PB22 G_2021_ P_2021_ G_2022_ P_2022_ BLACK
+Xbk2023 G_2223_ P_2223_ G_2021_ P_2021_ G_2023_ P_2023_ BLACK
+Xbf25 G_2425_ P_2425_ GB25 PB25 BUF2
+Xbk2427 G_2627_ P_2627_ G_2425_ P_2425_ G_2427_ P_2427_ BLACK
+Xbf29 G_2829_ P_2829_ GB29 PB29 BUF2
+Xbk2830 GB30 PB30 G_2829_ P_2829_ G_2830_ P_2830_ BLACK
+Xbk2831 G_3031_ P_3031_ G_2829_ P_2829_ G_2831_ P_2831_ BLACK
+
+
+// Third level
+Xbf3 G_03_ GB3 BUF
+Xgy07 G_47_ P_47_ G_03_ G_07_ GREY
+Xbf11 G_811_ P_811_ GB11 PB11 BUF2
+Xbk815 G_1215_ P_1215_ G_811_ P_811_ G_815_ P_815_ BLACK
+Xbf19 G_1619_ P_1619_ GB19 PB19 BUF2
+Xbk1623 G_2023_ P_2023_ G_1619_ P_1619_ G_1623_ P_1623_ BLACK
+Xbf27 G_2427_ P_2427_ GB27 PB27 BUF2
+Xbk2431 G_2831_ P_2831_ G_2427_ P_2427_ G_2431_ P_2431_ BLACK
+
+
+// Fourth level
+Xbf7 G_07_ GB7 BUF
+Xgy015 G_815_ P_815_ G_07_ G_015_ GREY
+Xbf23 G_1623_ P_1623_ GB23 PB23 BUF2
+Xbk1631 G_2431_ P_2431_ G_1623_ P_1623_ G_1631_ P_1631_ BLACK
+
+
+// Fifth level
+Xbf15 G_015_ GB15 BUF
+Xgy031 G_1631_ P_1631_ G_015_ G_031_ GREY
+
+// Sixth level
+Xgy023 GB23 PB23 GB15 G_023_ GREY
+Xbf31 G_031_ GB31 BUF
+
+// Seventh level
+Xgy011 GB11 PB11 GB7 G_011_ GREY
+Xgy019 GB19 PB19 GB15 G_019_ GREY
+Xbf23_2 G_023_ GB_23_2_ BUF
+Xgy027 GB27 PB27 G_023_ G_027_ GREY
+
+
+// Eigth level
+Xgy014 G_1214_ P_1214_ G_011_ G_014_ GREY
+Xgy022 G_2022_ P_2022_ G_019_ G_022_ GREY
+Xgy030 G_2830_ P_2830_ G_027_ G_030_ GREY
+
+
+// Nineth level
+Xgy05 GB5 PB5 GB3 G_05_ GREY
+Xgy09 GB9 PB9 GB7 G_09_ GREY
+Xbf11_2 G_011_ GB_11_2_ BUF
+Xgy013 GB13 PB13 G_011_ G_013_ GREY
+Xgy017 GB17 PB17 GB15 G_017_ GREY
+Xbf19_2 G_019_ GB_19_2_ BUF
+Xgy021 GB21 PB21 G_019_ G_021_ GREY
+Xgy025 GB25 PB25 GB_23_2_ G_025_ GREY
+Xbf27_2 G_027_ GB_27_2_ BUF
+Xgy029 GB29 PB29 G_027_ G_029_ GREY
+
+
+// Tenth level
+Xgy02 GB2 PB2 GB1 G_02_ GREY
+Xgy04 GB4 PB4 GB3 G_04_ GREY
+Xbf5_2 G_05_ GB_5_2_ BUF
+Xgy06 GB6 PB6 G_05_ G_06_ GREY
+Xgy08 GB8 PB8 GB7 G_08_ GREY
+Xbf9_2 G_09_ GB_9_2_ BUF
+Xgy010 GB10 PB10 G_09_ G_010_ GREY
+Xgy012 GB12 PB12 GB_11_2_ G_012_ GREY
+Xbf13_2 G_013_ GB_13_2_ BUF
+Xgy016 GB16 PB16 GB15 G_016_ GREY
+Xbf17_2 G_017_ GB_17_2_ BUF
+Xgy018 GB18 PB18 G_017_ G_018_ GREY
+Xgy020 GB20 PB20 GB_19_2_ G_020_ GREY
+Xbf21_2 G_021_ GB_21_2_ BUF
+Xgy024 GB24 PB24 GB_23_2_ G_024_ GREY
+Xbf25_2 G_025_ GB_25_2_ BUF
+Xgy026 GB26 PB26 G_025_ G_026_ GREY
+Xgy028 GB28 PB28 GB_27_2_ G_028_ GREY
+Xbf29_2 G_029_ GB_29_2_ BUF
+
+
+// Calculate Sum
+Xxor0 P0 GB0 s0 xor2
+Xxor1 P1 GB1 s1 xor2
+Xxor2 P2 G_02_ s2 xor2
+Xxor3 P3 GB3 s3 xor2
+Xxor4 P4 G_04_ s4 xor2
+Xxor5 P5 GB_5_2_ s5 xor2
+Xxor6 P6 G_06_ s6 xor2
+Xxor7 P7 GB7 s7 xor2
+Xxor8 P8 G_08_ s8 xor2
+Xxor9 P9 GB_9_2_ s9 xor2
+Xxor10 P10 G_010_ s10 xor2
+Xxor11 P11 GB_11_2_ s11 xor2
+Xxor12 P12 G_012_ s12 xor2
+Xxor13 P13 GB_13_2_ s13 xor2
+Xxor14 P14 G_014_ s14 xor2
+Xxor15 P15 GB15 s15 xor2
+Xxor16 P16 G_016_ s16 xor2
+Xxor17 P17 GB_17_2_ s17 xor2
+Xxor18 P18 G_018_ s18 xor2
+Xxor19 P19 GB_19_2_ s19 xor2
+Xxor20 P20 G_020_ s20 xor2
+Xxor21 P21 GB_21_2_ s21 xor2
+Xxor22 P22 G_022_ s22 xor2
+Xxor23 P23 GB_23_2_ s23 xor2
+Xxor24 P24 G_024_ s24 xor2
+Xxor25 P25 GB_25_2_ s25 xor2
+Xxor26 P26 G_026_ s26 xor2
+Xxor27 P27 GB_27_2_ s27 xor2
+Xxor28 P28 G_028_ s28 xor2
+Xxor29 P29 GB_29_2_ s29 xor2
+Xxor30 P30 G_030_ s30 xor2
+Xxor31 P31 GB31 s31 xor2
+// End of Brent-Kung 32bit adder
+
 
 // output z
 Xz s[31:0] z Z
 
 // output v
-Xv A[31] XB[31] s[31] v V
+Xv A31 XB31 s31 v V
 
 // output n
-.connect n s[31]
+.connect n s31
 .ends
